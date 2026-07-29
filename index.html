@@ -115,6 +115,21 @@
 
     .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
 
+    .result .actions {
+      width: 100%;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 8px;
+      margin-top: 0;
+    }
+
+    .result .actions button {
+      width: 100%;
+      min-width: 0;
+      padding-inline: 8px;
+      white-space: nowrap;
+    }
+
     button {
       min-height: 43px;
       padding: 10px 16px;
@@ -262,7 +277,29 @@
     }
 
     @media (max-width: 370px) {
-      .row { grid-template-columns: 1fr; }
+      body { padding: 6px; }
+      main { padding: 11px; }
+
+      .row {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 7px;
+      }
+
+      .row label {
+        min-width: 0;
+        font-size: .75rem;
+      }
+
+      .row input {
+        min-width: 0;
+        padding: 8px;
+        font-size: .86rem;
+      }
+
+      .mode-button {
+        padding-inline: 6px;
+        font-size: .8rem;
+      }
     }
   </style>
 </head>
