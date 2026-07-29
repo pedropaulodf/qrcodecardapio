@@ -319,11 +319,6 @@
           <input id="baseUrl" type="url" value="http://teste.qualitysys.com.br:9001" placeholder="https://seusite.com.br:1234" required>
         </label>
 
-        <label>
-          Host
-          <input id="host" type="text" placeholder="Ex.: 192.168.0.1">
-        </label>
-
         <div class="row">
           <label>
             ID do POS
@@ -346,9 +341,6 @@
           </label>
         </div>
 
-        <div class="actions">
-          <button class="primary" type="submit">Gerar QR Code</button>
-        </div>
         <p id="message" role="alert" aria-live="polite"></p>
       </form>
 
@@ -358,9 +350,6 @@
           <textarea id="plainText" placeholder="Digite qualquer texto aqui..." required></textarea>
         </label>
 
-        <div class="actions">
-          <button class="primary" type="submit">Gerar QR Code de texto</button>
-        </div>
         <p id="textMessage" role="alert" aria-live="polite"></p>
       </form>
 
@@ -397,17 +386,16 @@
       textMode.classList.toggle("active", !isCardapio);
       cardapioMode.setAttribute("aria-selected", String(isCardapio));
       textMode.setAttribute("aria-selected", String(!isCardapio));
-      qrContainer.innerHTML = "";
-      generatedContent.textContent = isCardapio
-        ? "A URL gerada aparecerá aqui."
-        : "O texto gerado aparecerá aqui.";
       copyButton.textContent = isCardapio
         ? "Copiar link"
         : "Copiar texto";
-      copyButton.disabled = true;
-      downloadButton.disabled = true;
       message.textContent = "";
       textMessage.textContent = "";
+      if (isCardapio) {
+        generateQr();
+      } else {
+        generateTextQr();
+      }
     }
 
     function buildUrl() {
@@ -416,8 +404,7 @@
         idPos: document.getElementById("idPos").value.trim(),
         mesa: document.getElementById("mesa").value.trim(),
         numeroComanda: document.getElementById("numeroComanda").value.trim(),
-        servicePort: document.getElementById("servicePort").value.trim(),
-        host: document.getElementById("host").value.trim()
+        servicePort: document.getElementById("servicePort").value.trim()
       };
 
       const requiredValues = [
@@ -464,18 +451,27 @@
         copyButton.disabled = false;
         downloadButton.disabled = false;
       } catch (error) {
+        qrContainer.innerHTML = "";
+        generatedContent.textContent = "A URL gerada aparecerá aqui.";
+        copyButton.disabled = true;
+        downloadButton.disabled = true;
         message.textContent = error.message;
       }
     }
 
     form.addEventListener("submit", generateQr);
+    form.addEventListener("input", generateQr);
 
-    textForm.addEventListener("submit", event => {
-      event.preventDefault();
+    function generateTextQr(event) {
+      if (event) event.preventDefault();
       textMessage.textContent = "";
       const text = document.getElementById("plainText").value;
 
       if (!text.trim()) {
+        qrContainer.innerHTML = "";
+        generatedContent.textContent = "O texto gerado aparecerá aqui.";
+        copyButton.disabled = true;
+        downloadButton.disabled = true;
         textMessage.textContent = "Digite um texto para gerar o QR Code.";
         return;
       }
@@ -492,7 +488,10 @@
       generatedContent.textContent = text;
       copyButton.disabled = false;
       downloadButton.disabled = false;
-    });
+    }
+
+    textForm.addEventListener("submit", generateTextQr);
+    textForm.addEventListener("input", generateTextQr);
 
     cardapioMode.addEventListener("click", () => setMode("cardapio"));
     textMode.addEventListener("click", () => setMode("texto"));
