@@ -316,13 +316,18 @@
       <form id="qrForm">
         <label>
           Endereço-base
-          <input id="baseUrl" type="url" value="http://teste.qualitysys.com.br:9001" placeholder="https://seusite.com.br:1234" required>
+          <input id="baseUrl" type="url" value="http://teste.qualitysys.com.br:9001" placeholder="https://seusite.com.br:9001" required>
+        </label>
+
+        <label>
+          Host
+          <input id="host" type="text" placeholder="Ex.: 192.168.0.10">
         </label>
 
         <div class="row">
           <label>
             ID do POS
-            <input id="idPos" type="tel" inputmode="numeric" value="4" placeholder="4" required>
+            <input id="idPos" type="tel" inputmode="numeric" value="6" placeholder="6" required>
           </label>
           <label>
             Mesa
@@ -337,7 +342,7 @@
           </label>
           <label>
             Porta do serviço
-            <input id="servicePort" type="tel" inputmode="numeric" value="7689" placeholder="7689" required>
+            <input id="servicePort" type="tel" inputmode="numeric" value="7869" placeholder="7869" required>
           </label>
         </div>
 
@@ -411,10 +416,18 @@
         idPos: document.getElementById("idPos").value.trim(),
         mesa: document.getElementById("mesa").value.trim(),
         numeroComanda: document.getElementById("numeroComanda").value.trim(),
-        servicePort: document.getElementById("servicePort").value.trim()
+        servicePort: document.getElementById("servicePort").value.trim(),
+        host: document.getElementById("host").value.trim()
       };
 
-      if (!base || Object.values(values).some(value => !value)) {
+      const requiredValues = [
+        values.idPos,
+        values.mesa,
+        values.numeroComanda,
+        values.servicePort
+      ];
+
+      if (!base || requiredValues.some(value => !value)) {
         throw new Error("Preencha todos os campos.");
       }
 
