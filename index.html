@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Gerador de QR Code — Cardápio</title>
+  <title>Gerador de QR Code</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
     :root {
@@ -50,8 +50,30 @@
       align-items: start;
     }
 
+    .mode-selector {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin: 20px 0;
+      padding: 5px;
+      border-radius: 12px;
+      background: #f0f1f7;
+    }
+
+    .mode-button {
+      color: var(--muted);
+      background: transparent;
+    }
+
+    .mode-button.active {
+      color: white;
+      background: var(--primary);
+      box-shadow: 0 3px 10px rgba(50, 51, 142, .18);
+    }
+
     form { display: grid; gap: 16px; }
     .row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    [hidden] { display: none !important; }
 
     label {
       display: grid;
@@ -72,7 +94,21 @@
       transition: border-color .15s, box-shadow .15s;
     }
 
-    input:focus {
+    textarea {
+      width: 100%;
+      min-height: 150px;
+      padding: 12px 13px;
+      resize: vertical;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      outline: none;
+      font: inherit;
+      color: var(--text);
+      background: #fff;
+    }
+
+    input:focus,
+    textarea:focus {
       border-color: var(--primary);
       box-shadow: 0 0 0 3px rgba(50, 51, 142, .12);
     }
@@ -129,68 +165,205 @@
     #message { min-height: 20px; margin: 0; font-size: .88rem; color: var(--danger); }
 
     @media (max-width: 760px) {
-      main { padding: 22px; }
-      .layout { grid-template-columns: 1fr; }
+      body {
+        padding: 10px;
+        place-items: start center;
+      }
+
+      main {
+        padding: 16px;
+        border-radius: 15px;
+      }
+
+      h1 {
+        margin-bottom: 4px;
+        font-size: 1.35rem;
+      }
+
+      .mode-selector {
+        margin: 12px 0;
+        padding: 4px;
+      }
+
+      .intro {
+        margin-bottom: 16px;
+        font-size: .88rem;
+      }
+
+      .layout {
+        grid-template-columns: 1fr;
+        gap: 18px;
+      }
+
+      form { gap: 11px; }
+      .row { gap: 10px; }
+
+      label {
+        gap: 5px;
+        font-size: .82rem;
+      }
+
+      input {
+        padding: 9px 10px;
+        border-radius: 8px;
+        font-size: .92rem;
+      }
+
+      textarea {
+        min-height: 105px;
+        padding: 9px 10px;
+        font-size: .92rem;
+      }
+
+      .actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-top: 2px;
+      }
+
+      .actions .primary { grid-column: 1 / -1; }
+
+      button {
+        min-height: 38px;
+        padding: 8px 10px;
+        font-size: .86rem;
+      }
+
+      .result {
+        gap: 10px;
+        padding: 13px;
+      }
+
+      #qrcode {
+        min-width: 184px;
+        min-height: 184px;
+        padding: 8px;
+      }
+
+      #qrcode img,
+      #qrcode canvas {
+        width: 168px !important;
+        height: 168px !important;
+      }
+
+      .url-box {
+        padding: 8px;
+        font-size: 10px;
+      }
+
+      #message {
+        min-height: 16px;
+        font-size: .8rem;
+      }
+    }
+
+    @media (max-width: 370px) {
       .row { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
   <main>
-    <h1>Gerador de QR Code do cardápio</h1>
-    <p class="intro">Preencha os dados abaixo para gerar o QR Code que abrirá a tela <strong>/cardapio</strong>.</p>
+    <h1>Gerador de QR Code</h1>
+
+    <div class="mode-selector" role="tablist" aria-label="Tipo de QR Code">
+      <button class="mode-button active" id="cardapioMode" type="button" role="tab" aria-selected="true">Link do cardápio</button>
+      <button class="mode-button" id="textMode" type="button" role="tab" aria-selected="false">Texto puro</button>
+    </div>
 
     <div class="layout">
       <form id="qrForm">
         <label>
           Endereço-base
-          <input id="baseUrl" type="url" value="http://teste.urlteste.com.br:9001" placeholder="https://seusite.com.br:9001" required>
+          <input id="baseUrl" type="url" value="http://teste.qualitysys.com.br:9001" placeholder="https://seusite.com.br:9001" required>
         </label>
 
         <div class="row">
           <label>
             ID do POS
-            <input id="idPos" type="text" inputmode="numeric" value="11" placeholder="11" required>
+            <input id="idPos" type="tel" inputmode="numeric" value="6" placeholder="6" required>
           </label>
           <label>
             Mesa
-            <input id="mesa" type="text" inputmode="numeric" value="5" placeholder="5" required>
+            <input id="mesa" type="tel" inputmode="numeric" value="1" placeholder="1" required>
           </label>
         </div>
 
         <div class="row">
           <label>
             Número da comanda
-            <input id="numeroComanda" type="text" inputmode="numeric" value="123456" placeholder="123456" required>
+            <input id="numeroComanda" type="tel" inputmode="numeric" value="111" placeholder="111" required>
           </label>
           <label>
             Porta do serviço
-            <input id="servicePort" type="text" inputmode="numeric" value="7790" placeholder="7790" required>
+            <input id="servicePort" type="tel" inputmode="numeric" value="7869" placeholder="7869" required>
           </label>
         </div>
 
         <div class="actions">
           <button class="primary" type="submit">Gerar QR Code</button>
-          <button class="secondary" id="copyButton" type="button" disabled>Copiar URL</button>
-          <button class="secondary" id="downloadButton" type="button" disabled>Baixar PNG</button>
         </div>
         <p id="message" role="alert" aria-live="polite"></p>
       </form>
 
+      <form id="textForm" hidden>
+        <label>
+          Texto do QR Code
+          <textarea id="plainText" placeholder="Digite qualquer texto aqui..." required></textarea>
+        </label>
+
+        <div class="actions">
+          <button class="primary" type="submit">Gerar QR Code de texto</button>
+        </div>
+        <p id="textMessage" role="alert" aria-live="polite"></p>
+      </form>
+
       <section class="result" aria-label="Resultado">
         <div id="qrcode" aria-label="QR Code gerado"></div>
-        <div class="url-box" id="generatedUrl">A URL gerada aparecerá aqui.</div>
+        <div class="url-box" id="generatedContent">O conteúdo gerado aparecerá aqui.</div>
+        <div class="actions">
+          <button class="secondary" id="copyButton" type="button" disabled>Copiar link</button>
+          <button class="secondary" id="downloadButton" type="button" disabled>Baixar PNG</button>
+        </div>
       </section>
     </div>
   </main>
 
   <script>
     const form = document.getElementById("qrForm");
+    const textForm = document.getElementById("textForm");
     const qrContainer = document.getElementById("qrcode");
-    const generatedUrl = document.getElementById("generatedUrl");
+    const generatedContent = document.getElementById("generatedContent");
     const message = document.getElementById("message");
+    const textMessage = document.getElementById("textMessage");
     const copyButton = document.getElementById("copyButton");
     const downloadButton = document.getElementById("downloadButton");
+    const cardapioMode = document.getElementById("cardapioMode");
+    const textMode = document.getElementById("textMode");
+    let currentMode = "cardapio";
+
+    function setMode(mode) {
+      currentMode = mode;
+      const isCardapio = mode === "cardapio";
+      form.hidden = !isCardapio;
+      textForm.hidden = isCardapio;
+      cardapioMode.classList.toggle("active", isCardapio);
+      textMode.classList.toggle("active", !isCardapio);
+      cardapioMode.setAttribute("aria-selected", String(isCardapio));
+      textMode.setAttribute("aria-selected", String(!isCardapio));
+      qrContainer.innerHTML = "";
+      generatedContent.textContent = isCardapio
+        ? "A URL gerada aparecerá aqui."
+        : "O texto gerado aparecerá aqui.";
+      copyButton.textContent = isCardapio
+        ? "Copiar link"
+        : "Copiar texto";
+      copyButton.disabled = true;
+      downloadButton.disabled = true;
+      message.textContent = "";
+      textMessage.textContent = "";
+    }
 
     function buildUrl() {
       const base = document.getElementById("baseUrl").value.trim();
@@ -234,7 +407,7 @@
           colorLight: "#ffffff",
           correctLevel: QRCode.CorrectLevel.H
         });
-        generatedUrl.textContent = url;
+        generatedContent.textContent = url;
         copyButton.disabled = false;
         downloadButton.disabled = false;
       } catch (error) {
@@ -244,13 +417,45 @@
 
     form.addEventListener("submit", generateQr);
 
+    textForm.addEventListener("submit", event => {
+      event.preventDefault();
+      textMessage.textContent = "";
+      const text = document.getElementById("plainText").value;
+
+      if (!text.trim()) {
+        textMessage.textContent = "Digite um texto para gerar o QR Code.";
+        return;
+      }
+
+      qrContainer.innerHTML = "";
+      new QRCode(qrContainer, {
+        text,
+        width: 208,
+        height: 208,
+        colorDark: "#111111",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+      });
+      generatedContent.textContent = text;
+      copyButton.disabled = false;
+      downloadButton.disabled = false;
+    });
+
+    cardapioMode.addEventListener("click", () => setMode("cardapio"));
+    textMode.addEventListener("click", () => setMode("texto"));
+
     copyButton.addEventListener("click", async () => {
       try {
-        await navigator.clipboard.writeText(generatedUrl.textContent);
-        copyButton.textContent = "URL copiada!";
-        setTimeout(() => { copyButton.textContent = "Copiar URL"; }, 1600);
+        await navigator.clipboard.writeText(generatedContent.textContent);
+        copyButton.textContent = "Copiado!";
+        setTimeout(() => {
+          copyButton.textContent = currentMode === "cardapio"
+            ? "Copiar link"
+            : "Copiar texto";
+        }, 1600);
       } catch {
-        message.textContent = "Não foi possível copiar automaticamente. Selecione a URL exibida e copie manualmente.";
+        const targetMessage = currentMode === "cardapio" ? message : textMessage;
+        targetMessage.textContent = "Não foi possível copiar automaticamente. Selecione o conteúdo exibido e copie manualmente.";
       }
     });
 
@@ -262,7 +467,7 @@
       if (!source) return;
       const link = document.createElement("a");
       link.href = source;
-      link.download = "qrcode-cardapio.png";
+      link.download = currentMode === "cardapio" ? "qrcode-cardapio.png" : "qrcode-texto.png";
       link.click();
     });
 
