@@ -425,7 +425,7 @@
         throw new Error("Informe um endereço-base válido, incluindo http:// ou https://.");
       }
 
-      url.pathname = url.pathname.replace(/\/+$/, "") + "/cardapio";
+      url.pathname = url.pathname.replace(/\/+$/, "") + "/cardapioDigital";
       url.search = "";
       url.hash = "";
       Object.entries(values).forEach(([key, value]) => url.searchParams.set(key, value));
