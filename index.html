@@ -236,15 +236,18 @@
       }
 
       #qrcode {
-        min-width: 184px;
-        min-height: 184px;
+        width: 100%;
+        min-width: 0;
+        min-height: 0;
+        aspect-ratio: 1;
         padding: 8px;
       }
 
       #qrcode img,
       #qrcode canvas {
-        width: 168px !important;
-        height: 168px !important;
+        width: 100% !important;
+        height: auto !important;
+        aspect-ratio: 1;
       }
 
       .url-box {
