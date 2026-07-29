@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gerador de QR Code — Cardápio</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    :root {
+      color-scheme: light;
+      --primary: #32338e;
+      --primary-dark: #24256c;
+      --background: #f4f5fb;
+      --surface: #ffffff;
+      --text: #202136;
+      --muted: #6c6e82;
+      --border: #dfe1eb;
+      --danger: #b42318;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 32px 16px;
+      display: grid;
+      place-items: center;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background: linear-gradient(145deg, #eef0ff, var(--background) 45%, #f8f8fc);
+    }
+
+    main {
+      width: min(920px, 100%);
+      padding: 32px;
+      border: 1px solid rgba(50, 51, 142, .10);
+      border-radius: 22px;
+      background: var(--surface);
+      box-shadow: 0 20px 60px rgba(31, 32, 74, .12);
+    }
+
+    h1 { margin: 0 0 8px; font-size: clamp(1.55rem, 4vw, 2.15rem); }
+    .intro { margin: 0 0 28px; color: var(--muted); }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 300px;
+      gap: 32px;
+      align-items: start;
+    }
+
+    form { display: grid; gap: 16px; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    label {
+      display: grid;
+      gap: 7px;
+      font-size: .9rem;
+      font-weight: 700;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px 13px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      outline: none;
+      font: inherit;
+      color: var(--text);
+      background: #fff;
+      transition: border-color .15s, box-shadow .15s;
+    }
+
+    input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(50, 51, 142, .12);
+    }
+
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+
+    button {
+      min-height: 43px;
+      padding: 10px 16px;
+      border: 0;
+      border-radius: 10px;
+      cursor: pointer;
+      font: inherit;
+      font-weight: 750;
+    }
+
+    .primary { color: white; background: var(--primary); }
+    .primary:hover { background: var(--primary-dark); }
+    .secondary { color: var(--primary); background: #eeeeff; }
+    button:disabled { cursor: not-allowed; opacity: .45; }
+
+    .result {
+      display: grid;
+      justify-items: center;
+      gap: 16px;
+      padding: 22px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: #fafaff;
+    }
+
+    #qrcode {
+      min-width: 232px;
+      min-height: 232px;
+      padding: 12px;
+      display: grid;
+      place-items: center;
+      border-radius: 10px;
+      background: white;
+    }
+
+    #qrcode img, #qrcode canvas { max-width: 100%; height: auto !important; }
+
+    .url-box {
+      width: 100%;
+      padding: 11px;
+      overflow-wrap: anywhere;
+      border-radius: 8px;
+      font: 12px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace;
+      color: var(--muted);
+      background: #f0f1f7;
+    }
+
+    #message { min-height: 20px; margin: 0; font-size: .88rem; color: var(--danger); }
+
+    @media (max-width: 760px) {
+      main { padding: 22px; }
+      .layout { grid-template-columns: 1fr; }
+      .row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Gerador de QR Code do cardápio</h1>
+    <p class="intro">Preencha os dados abaixo para gerar o QR Code que abrirá a tela <strong>/cardapio</strong>.</p>
+
+    <div class="layout">
+      <form id="qrForm">
+        <label>
+          Endereço-base
+          <input id="baseUrl" type="url" value="http://teste.urlteste.com.br:9001" placeholder="https://seusite.com.br:9001" required>
+        </label>
+
+        <div class="row">
+          <label>
+            ID do POS
+            <input id="idPos" type="text" inputmode="numeric" value="11" placeholder="11" required>
+          </label>
+          <label>
+            Mesa
+            <input id="mesa" type="text" inputmode="numeric" value="5" placeholder="5" required>
+          </label>
+        </div>
+
+        <div class="row">
+          <label>
+            Número da comanda
+            <input id="numeroComanda" type="text" inputmode="numeric" value="123456" placeholder="123456" required>
+          </label>
+          <label>
+            Porta do serviço
+            <input id="servicePort" type="text" inputmode="numeric" value="7790" placeholder="7790" required>
+          </label>
+        </div>
+
+        <div class="actions">
+          <button class="primary" type="submit">Gerar QR Code</button>
+          <button class="secondary" id="copyButton" type="button" disabled>Copiar URL</button>
+          <button class="secondary" id="downloadButton" type="button" disabled>Baixar PNG</button>
+        </div>
+        <p id="message" role="alert" aria-live="polite"></p>
+      </form>
+
+      <section class="result" aria-label="Resultado">
+        <div id="qrcode" aria-label="QR Code gerado"></div>
+        <div class="url-box" id="generatedUrl">A URL gerada aparecerá aqui.</div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const form = document.getElementById("qrForm");
+    const qrContainer = document.getElementById("qrcode");
+    const generatedUrl = document.getElementById("generatedUrl");
+    const message = document.getElementById("message");
+    const copyButton = document.getElementById("copyButton");
+    const downloadButton = document.getElementById("downloadButton");
+
+    function buildUrl() {
+      const base = document.getElementById("baseUrl").value.trim();
+      const values = {
+        idPos: document.getElementById("idPos").value.trim(),
+        mesa: document.getElementById("mesa").value.trim(),
+        numeroComanda: document.getElementById("numeroComanda").value.trim(),
+        servicePort: document.getElementById("servicePort").value.trim()
+      };
+
+      if (!base || Object.values(values).some(value => !value)) {
+        throw new Error("Preencha todos os campos.");
+      }
+
+      let url;
+      try {
+        url = new URL(base);
+      } catch {
+        throw new Error("Informe um endereço-base válido, incluindo http:// ou https://.");
+      }
+
+      url.pathname = url.pathname.replace(/\/+$/, "") + "/cardapio";
+      url.search = "";
+      url.hash = "";
+      Object.entries(values).forEach(([key, value]) => url.searchParams.set(key, value));
+      return url.toString();
+    }
+
+    function generateQr(event) {
+      if (event) event.preventDefault();
+      message.textContent = "";
+
+      try {
+        const url = buildUrl();
+        qrContainer.innerHTML = "";
+        new QRCode(qrContainer, {
+          text: url,
+          width: 208,
+          height: 208,
+          colorDark: "#111111",
+          colorLight: "#ffffff",
+          correctLevel: QRCode.CorrectLevel.H
+        });
+        generatedUrl.textContent = url;
+        copyButton.disabled = false;
+        downloadButton.disabled = false;
+      } catch (error) {
+        message.textContent = error.message;
+      }
+    }
+
+    form.addEventListener("submit", generateQr);
+
+    copyButton.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(generatedUrl.textContent);
+        copyButton.textContent = "URL copiada!";
+        setTimeout(() => { copyButton.textContent = "Copiar URL"; }, 1600);
+      } catch {
+        message.textContent = "Não foi possível copiar automaticamente. Selecione a URL exibida e copie manualmente.";
+      }
+    });
+
+    downloadButton.addEventListener("click", () => {
+      const image = qrContainer.querySelector("img");
+      const canvas = qrContainer.querySelector("canvas");
+      const source = image?.src || canvas?.toDataURL("image/png");
+
+      if (!source) return;
+      const link = document.createElement("a");
+      link.href = source;
+      link.download = "qrcode-cardapio.png";
+      link.click();
+    });
+
+    window.addEventListener("load", generateQr);
+  </script>
+</body>
+</html>
