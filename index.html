@@ -61,14 +61,29 @@
     }
 
     .mode-button {
+      min-height: 43px;
+      padding: 12px 18px;
       color: var(--muted);
       background: transparent;
+      border: 0;
+      border-radius: 10px;
+      cursor: pointer;
+      font: inherit;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, box-shadow 0.12s, transform 0.08s;
     }
 
     .mode-button.active {
       color: white;
       background: var(--primary);
-      box-shadow: 0 3px 10px rgba(50, 51, 142, .18);
+      box-shadow: 0 3px 10px rgba(50, 51, 142, 0.18);
+    }
+
+    .mode-button:hover:not(.active) {
+      background: rgba(50, 51, 142, 0.08);
     }
 
     form { display: grid; gap: 16px; }
@@ -119,15 +134,16 @@
       width: 100%;
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 8px;
+      gap: 12px;
       margin-top: 0;
     }
 
     .result .actions button {
       width: 100%;
       min-width: 0;
-      padding-inline: 8px;
+      padding: 10px 12px;
       white-space: nowrap;
+      border-radius: 10px;
     }
 
     button {
@@ -138,12 +154,30 @@
       cursor: pointer;
       font: inherit;
       font-weight: 750;
+      transition: background 0.15s, box-shadow 0.12s, transform 0.08s;
+    }
+
+    button:focus-visible,
+    .mode-button:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 6px rgba(50, 51, 142, 0.18);
+      transform: translateY(-1px);
     }
 
     .primary { color: white; background: var(--primary); }
     .primary:hover { background: var(--primary-dark); }
-    .secondary { color: var(--primary); background: #eeeeff; }
-    button:disabled { cursor: not-allowed; opacity: .45; }
+    
+    .secondary { 
+      color: var(--primary); 
+      background: #e8eaff;
+      border: 1px solid #d4d7f0;
+    }
+    
+    .secondary:hover { 
+      background: #dde1ff;
+    }
+    
+    button:disabled { cursor: not-allowed; opacity: 0.55; }
 
     .result {
       display: grid;
@@ -172,8 +206,8 @@
       padding: 11px;
       overflow-wrap: anywhere;
       border-radius: 8px;
-      font: 12px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace;
-      color: var(--muted);
+      font: 13px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace;
+      color: #54556a;
       background: #f0f1f7;
     }
 
@@ -198,6 +232,12 @@
       .mode-selector {
         margin: 12px 0;
         padding: 4px;
+      }
+
+      .mode-button {
+        min-height: 38px;
+        padding: 10px 12px;
+        font-size: .86rem;
       }
 
       .intro {
@@ -248,6 +288,15 @@
       .result {
         gap: 10px;
         padding: 13px;
+      }
+
+      .result .actions {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+
+      .result .actions .primary {
+        grid-column: 1 / -1;
       }
 
       #qrcode {
@@ -301,61 +350,6 @@
         font-size: .8rem;
       }
     }
-
-    /* --- Accessibility and button improvements (added) --- */
-    .mode-button {
-      padding: 12px 18px;            /* aumenta alvo clicável */
-      border-radius: 10px;           /* bordas mais suaves */
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      transition: background .15s, box-shadow .12s, transform .08s;
-    }
-
-    /* foco acessível para todos os botões (keyboard) */
-    button:focus,
-    .mode-button:focus {
-      outline: none;
-      box-shadow: 0 0 0 4px rgba(50, 51, 142, 0.14); /* foco visível sem depender do navegador */
-      transform: translateY(-1px);
-    }
-
-    /* foco visível somente em navegação por teclado */
-    button:focus-visible,
-    .mode-button:focus-visible {
-      box-shadow: 0 0 0 6px rgba(50, 51, 142, 0.18);
-    }
-
-    /* ações do resultado: mais espaçamento e botões com padding consistente */
-    .result .actions {
-      gap: 12px;
-      margin-top: 8px;
-    }
-
-    .result .actions button {
-      padding: 10px 12px;
-      border-radius: 10px;
-    }
-
-    /* contraste da URL (melhora leitura) */
-    .url-box {
-      color: #54556a; /* um pouco mais escuro que var(--muted) */
-      font-size: 13px;
-    }
-
-    /* visual mais claro para botão desabilitado */
-    button:disabled {
-      opacity: 0.55;
-      cursor: not-allowed;
-      filter: none;
-    }
-
-    /* ajustes móveis */
-    @media (max-width: 760px) {
-      .result .actions { gap: 8px; }
-      .mode-button { padding: 10px 12px; }
-    }
-
   </style>
 </head>
 <body>
@@ -437,7 +431,6 @@
       textMode.classList.toggle("active", !isCardapio);
       cardapioMode.setAttribute("aria-selected", String(isCardapio));
       textMode.setAttribute("aria-selected", String(!isCardapio));
-      // ARIA panels visibility for screen readers
       form.setAttribute("aria-hidden", String(!isCardapio));
       textForm.setAttribute("aria-hidden", String(isCardapio));
 
@@ -544,7 +537,7 @@
       generatedContent.textContent = text;
       copyButton.disabled = false;
       downloadButton.disabled = false;
-      openButton.disabled = true; // texto livre não é necessariamente um link
+      openButton.disabled = true;
     }
 
     textForm.addEventListener("submit", generateTextQr);
