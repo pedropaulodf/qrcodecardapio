@@ -118,7 +118,7 @@
     .result .actions {
       width: 100%;
       display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 8px;
       margin-top: 0;
     }
@@ -330,16 +330,10 @@
           </label>
         </div>
 
-        <div class="row">
-          <label>
-            Número da comanda
-            <input id="numeroComanda" type="tel" inputmode="numeric" value="111" placeholder="111" required>
-          </label>
-          <label>
-            Porta do serviço
-            <input id="servicePort" type="tel" inputmode="numeric" value="7689" placeholder="7689" required>
-          </label>
-        </div>
+        <label>
+          Número da comanda
+          <input id="numeroComanda" type="tel" inputmode="numeric" value="111" placeholder="111" required>
+        </label>
 
         <p id="message" role="alert" aria-live="polite"></p>
       </form>
@@ -359,6 +353,7 @@
         <div class="actions">
           <button class="secondary" id="copyButton" type="button" disabled>Copiar link</button>
           <button class="secondary" id="downloadButton" type="button" disabled>Baixar PNG</button>
+          <button class="primary" id="openButton" type="button" disabled>Abrir link</button>
         </div>
       </section>
     </div>
@@ -373,6 +368,7 @@
     const textMessage = document.getElementById("textMessage");
     const copyButton = document.getElementById("copyButton");
     const downloadButton = document.getElementById("downloadButton");
+    const openButton = document.getElementById("openButton");
     const cardapioMode = document.getElementById("cardapioMode");
     const textMode = document.getElementById("textMode");
     let currentMode = "cardapio";
@@ -403,15 +399,13 @@
       const values = {
         idPos: document.getElementById("idPos").value.trim(),
         mesa: document.getElementById("mesa").value.trim(),
-        numeroComanda: document.getElementById("numeroComanda").value.trim(),
-        servicePort: document.getElementById("servicePort").value.trim()
+        numeroComanda: document.getElementById("numeroComanda").value.trim()
       };
 
       const requiredValues = [
         values.idPos,
         values.mesa,
-        values.numeroComanda,
-        values.servicePort
+        values.numeroComanda
       ];
 
       if (!base || requiredValues.some(value => !value)) {
@@ -450,11 +444,13 @@
         generatedContent.textContent = url;
         copyButton.disabled = false;
         downloadButton.disabled = false;
+        openButton.disabled = false;
       } catch (error) {
         qrContainer.innerHTML = "";
         generatedContent.textContent = "A URL gerada aparecerá aqui.";
         copyButton.disabled = true;
         downloadButton.disabled = true;
+        openButton.disabled = true;
         message.textContent = error.message;
       }
     }
@@ -472,6 +468,7 @@
         generatedContent.textContent = "O texto gerado aparecerá aqui.";
         copyButton.disabled = true;
         downloadButton.disabled = true;
+        openButton.disabled = true;
         textMessage.textContent = "Digite um texto para gerar o QR Code.";
         return;
       }
@@ -488,6 +485,7 @@
       generatedContent.textContent = text;
       copyButton.disabled = false;
       downloadButton.disabled = false;
+      openButton.disabled = true; // texto livre não é necessariamente um link
     }
 
     textForm.addEventListener("submit", generateTextQr);
@@ -521,6 +519,18 @@
       link.href = source;
       link.download = currentMode === "cardapio" ? "qrcode-cardapio.png" : "qrcode-texto.png";
       link.click();
+    });
+
+    openButton.addEventListener("click", () => {
+      const content = generatedContent.textContent?.trim();
+      if (!content) return;
+      try {
+        const url = new URL(content);
+        window.open(url.toString(), "_blank", "noopener");
+      } catch {
+        const targetMessage = currentMode === "cardapio" ? message : textMessage;
+        targetMessage.textContent = "O conteúdo gerado não é um link válido.";
+      }
     });
 
     window.addEventListener("load", generateQr);
