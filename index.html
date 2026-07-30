@@ -301,6 +301,61 @@
         font-size: .8rem;
       }
     }
+
+    /* --- Accessibility and button improvements (added) --- */
+    .mode-button {
+      padding: 12px 18px;            /* aumenta alvo clicável */
+      border-radius: 10px;           /* bordas mais suaves */
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background .15s, box-shadow .12s, transform .08s;
+    }
+
+    /* foco acessível para todos os botões (keyboard) */
+    button:focus,
+    .mode-button:focus {
+      outline: none;
+      box-shadow: 0 0 0 4px rgba(50, 51, 142, 0.14); /* foco visível sem depender do navegador */
+      transform: translateY(-1px);
+    }
+
+    /* foco visível somente em navegação por teclado */
+    button:focus-visible,
+    .mode-button:focus-visible {
+      box-shadow: 0 0 0 6px rgba(50, 51, 142, 0.18);
+    }
+
+    /* ações do resultado: mais espaçamento e botões com padding consistente */
+    .result .actions {
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .result .actions button {
+      padding: 10px 12px;
+      border-radius: 10px;
+    }
+
+    /* contraste da URL (melhora leitura) */
+    .url-box {
+      color: #54556a; /* um pouco mais escuro que var(--muted) */
+      font-size: 13px;
+    }
+
+    /* visual mais claro para botão desabilitado */
+    button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      filter: none;
+    }
+
+    /* ajustes móveis */
+    @media (max-width: 760px) {
+      .result .actions { gap: 8px; }
+      .mode-button { padding: 10px 12px; }
+    }
+
   </style>
 </head>
 <body>
@@ -308,12 +363,12 @@
     <h1>Gerador de QR Code</h1>
 
     <div class="mode-selector" role="tablist" aria-label="Tipo de QR Code">
-      <button class="mode-button active" id="cardapioMode" type="button" role="tab" aria-selected="true">Link do cardápio</button>
-      <button class="mode-button" id="textMode" type="button" role="tab" aria-selected="false">Texto puro</button>
+      <button class="mode-button active" id="cardapioMode" type="button" role="tab" aria-selected="true" aria-controls="qrForm">Link do cardápio</button>
+      <button class="mode-button" id="textMode" type="button" role="tab" aria-selected="false" aria-controls="textForm">Texto puro</button>
     </div>
 
     <div class="layout">
-      <form id="qrForm">
+      <form id="qrForm" role="tabpanel" aria-labelledby="cardapioMode" aria-hidden="false">
         <label>
           Endereço-base
           <input id="baseUrl" type="url" value="http://teste.qualitysys.com.br:7789" placeholder="https://seusite.com.br:1234" required>
@@ -338,7 +393,7 @@
         <p id="message" role="alert" aria-live="polite"></p>
       </form>
 
-      <form id="textForm" hidden>
+      <form id="textForm" hidden role="tabpanel" aria-labelledby="textMode" aria-hidden="true">
         <label>
           Texto do QR Code
           <textarea id="plainText" placeholder="Digite qualquer texto aqui..." required></textarea>
@@ -382,6 +437,10 @@
       textMode.classList.toggle("active", !isCardapio);
       cardapioMode.setAttribute("aria-selected", String(isCardapio));
       textMode.setAttribute("aria-selected", String(!isCardapio));
+      // ARIA panels visibility for screen readers
+      form.setAttribute("aria-hidden", String(!isCardapio));
+      textForm.setAttribute("aria-hidden", String(isCardapio));
+
       copyButton.textContent = isCardapio
         ? "Copiar link"
         : "Copiar texto";
